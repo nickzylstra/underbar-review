@@ -127,10 +127,17 @@
 
 
   // Return the results of applying an iterator to each element.
-  _.map = function(collection, iterator) {
+  _.map = function(collection, iterator = _.identity) {
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    const mappedValues = [];
+
+    _.each(collection, function (val, key, collection) {
+      mappedValues.push(iterator(val, key, collection));
+    });
+
+    return mappedValues;
   };
 
   /*
@@ -172,6 +179,18 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+    let existsAccumulator = arguments.length > 2;
+
+    _.each(collection, function (val, key, coll) {
+      if (!existsAccumulator) {
+        accumulator = val;
+        existsAccumulator = true;
+      } else {
+        accumulator = iterator(accumulator, val);
+      }
+    });
+
+    return accumulator;
   };
 
   // Determine if the array or object contains a given value (using `===`).
