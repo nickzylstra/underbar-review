@@ -291,11 +291,11 @@
 
     // TIP: We'll return a new function that delegates to the old one, but only
     // if it hasn't been called before.
-    return function() {
+    return function(...args) {
       if (!alreadyCalled) {
         // TIP: .apply(this, arguments) is the standard way to pass on all of the
         // infromation from one function call to another.
-        result = func.apply(this, arguments);
+        result = func(...args);
         alreadyCalled = true;
       }
       // The new function always returns the originally computed result.
@@ -312,6 +312,21 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    const results = {};
+
+    return function(...args) {
+      // var args = arguments;
+      const argsString = JSON.stringify(args);
+
+
+      if (!Object.prototype.hasOwnProperty.call(results, argsString)) {
+        // return results[argsString];
+        const result = func(...args);
+        results[argsString] = result;
+      }
+
+      return results[argsString];
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -320,7 +335,8 @@
   // The arguments for the original function are passed after the wait
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
-  _.delay = function(func, wait) {
+  _.delay = function(func, wait, ...args) {
+    setTimeout(() => func(...args), wait);
   };
 
 
@@ -335,6 +351,19 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    const results = [];
+    const calledIdxs = {};
+    const arrLen = array.length;
+
+    while (results.length !== arrLen) {
+      const randIdx = Math.floor(Math.random() * arrLen);
+      if (!Object.prototype.hasOwnProperty.call(calledIdxs, randIdx)) {
+        calledIdxs[randIdx] = true;
+        results.push(array[randIdx]);
+      }
+    }
+
+    return results;
   };
 
 
