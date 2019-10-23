@@ -107,16 +107,18 @@
     if (isSorted) {
       let prev;
       _.each(array, function(value, key, coll) {
-        if (value !== prev) {
+        const iterVal = iterator(value);
+        if (iterVal !== prev) {
           uniques.push(value);
         }
-        prev = value;
+        prev = iterVal;
       });
     } else {
       let prevValues = {};
       _.each(array, function(value, key, coll) {
-        if (!prevValues.hasOwnProperty(value)) {
-          prevValues[value] = value;
+        const iterVal = iterator(value);
+        if (!prevValues.hasOwnProperty(iterVal)) {
+          prevValues[iterVal] = iterVal;
           uniques.push(value);
         }
       });
@@ -207,14 +209,21 @@
 
 
   // Determine whether all of the elements match a truth test.
-  _.every = function(collection, iterator) {
+  _.every = function(collection, iterator = _.identity) {
     // TIP: Try re-using reduce() here.
+    return _.reduce(collection, function (acc, val) {
+      // debugger;
+      return acc && !!iterator(val);
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
-  _.some = function(collection, iterator) {
+  _.some = function(collection, iterator = _.identity) {
     // TIP: There's a very clever way to re-use every() here.
+    return !_.every(collection, function (val) {
+      return !iterator(val);
+    });
   };
 
 
@@ -236,12 +245,30 @@
   //   }, {
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
-  _.extend = function(obj) {
+  _.extend = function(obj, ...objs) {
+    for (let i = 0; i < objs.length; i++) {
+      let keys = Object.keys(objs[i]);
+      for (let k = 0; k < keys.length; k++ ) {
+        obj[keys[k]] = objs[i][keys[k]];
+      }
+    }
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
-  _.defaults = function(obj) {
+  _.defaults = function(obj, ...objs) {
+    for (let i = 0; i < objs.length; i++) {
+      // debugger;
+      const keys = Object.keys(objs[i]);
+      for (let k = 0; k < keys.length; k++ ) {
+        const key = keys[k];
+        if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+          obj[key] = objs[i][key];
+        }
+      }
+    }
+    return obj;
   };
 
 
